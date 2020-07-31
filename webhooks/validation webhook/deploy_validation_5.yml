@@ -1,0 +1,43 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: arunv
+  namespace: default
+  labels:
+    app: web
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: web
+  template:
+    metadata:
+      labels:
+        app: web
+    spec:
+      containers:
+        - name: webhook
+          image: arunvel1988/validation_webhook
+          command: ["/bin/sh"]          
+          args: ["-c","while true; do foo; sleep 2; done"]
+          args: ["-c","python3 /tmp/app.py"]
+          volumeMounts:
+            - name: webhook-certs
+              mountPath: /certs       
+      volumes:
+        - name: webhook-certs
+          secret:
+            secretName: my-certs       
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: arunv
+  namespace: default
+spec:
+  ports:
+  - name: webhook
+    port: 443
+    targetPort: 443
+  selector:
+    app: web
